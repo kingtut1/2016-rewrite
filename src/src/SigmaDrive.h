@@ -12,6 +12,7 @@ class SigmaDrive
 {
 public:
 	VictorSP *left1,*left2,*right1,*right2;
+	VictorSP *intake, *leftIndexer, *rightIndexer, *armMotor, *shooter;
 	RobotDrive *drive108;
 	DoubleSolenoid *shifter, *shooterAim;
 	Encoder *leftEnc, *rightEnc;
@@ -23,7 +24,10 @@ public:
 	void Shift(bool High);
 	virtual ~SigmaDrive();
 	void Shooter(bool Up);
-	void Arm(bool Up);
-
+	void ArmDown();
+	void ArmUp();
+	void Intake(bool running);
+	void ShootBall(bool shoot);
+	void IntakeAndShoot(bool run );
 };
 #endif /* SRC_SIGMADRIVE_H_ */

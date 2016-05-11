@@ -5,16 +5,9 @@
 #define FORWARD -1
 #define BACKWARD 1
 
-#define HIGHSPEED 1130
-#define LOWSPEED 285.5
-
-#define HIGHGEAR 1111
-#define LOWGEAR 2222
-
-#define TICKSPERFEET 421
 
 /**
- * This is a demo program showing the use of the RobotDrive class.
+ * This is a demo program showing the use of the RobotDrive  class.
  * The SampleRobot class is the base of a robot application that will automatically call your
  * Autonomous and OperatorControl methods at the right time as controlled by the switches on
  * the driver station or the field controls.
@@ -25,35 +18,37 @@
  */
 class Robot: public SampleRobot
 {
-	SigmaDrive *Base; // robot drive system
-	Joystick leftStick, rightStick; // only joystick
+	SigmaDrive *Base; // robot drive system; replaces (drive108)
+	Joystick *leftStick, *rightStick, *controller;
 	SendableChooser *chooser;
+	Encoder *leftEnc, *rightEnc, *shooterEnc;
+	VictorSP *intake, *leftIndexer, *rightIndexer, *armMoter;
+	Option *Auto;
+
+
 
 	const std::string autoNameDefault = "Default";
 	const std::string autoNameCustom = "My Auto";
 
 public:
-	Robot() :	// these must be initialized in the same order
-			leftStick(0), rightStick(1),		// as they are declared above.
-			chooser(),
-			Base()
-	{
-		//Note SmartDashboard is not initialized here, wait until RobotInit to make SmartDashboard calls
-
-	}
-
 	void RobotInit()
 	{
 		Base = new SigmaDrive();
-
+		//Autonomous options
 		chooser = new SendableChooser();
 		chooser->AddDefault("Low Bar", new Option(1));
-		chooser->AddObject("Defenses", new Option(2));
+		chooser->AddObject("Breaching Defenses", new Option(2));
 		chooser->AddObject("Two Point Auto", new Option(3));
 		SmartDashboard::PutData("Auto", chooser);
 
+		leftEnc = new Encoder(8,9, false, Encoder::EncodingType::k4X);
+		rightEnc = new Encoder(6,7, true, Encoder::EncodingType::k4X);
+		shooterEnc = new Encoder(4,5);
 
+		controller = new Joystick(2);
 
+		leftStick = new Joystick(0);
+		rightStick = new Joystick(1);
 	}
 
 	/**
@@ -70,15 +65,26 @@ public:
 		std::string autoSelected = *((std::string*)chooser->GetSelected());
 		//std::string autoSelected = SmartDashboard::GetString("Auto Selector", autoNameDefault);
 		std::cout << "Auto selected: " << autoSelected << std::endl;
-
-		if(autoSelected == autoNameCustom){
-			//Custom Auto goes here
+		Auto = (Option*) chooser->GetSelected();
+		if(Auto->Get() == 1)
+		{
+			//Low Bar code here
 			std::cout << "Running custom Autonomous" << std::endl;
  	// stop robot
-		} else {
-			//Default Auto goes here
+		}
+		else if(Auto->Get() == 2)
+		{
+			 //Standard defense codes here
 			std::cout << "Running default Autonomous" << std::endl;
 	// stop robot
+		}
+		else if(Auto->Get() == 3)
+		{
+			//2 point auto code here
+		}
+		else
+		{
+			//Low Bar code here if its not default
 		}
 
 	}
@@ -91,45 +97,85 @@ public:
 		//myRobot.SetSafetyEnabled(true);
 		while (IsOperatorControl() && IsEnabled())
 		{
-			Base->TankDrive(leftStick.GetY(), rightStick.GetY());
-			if(rightStick.GetRawButton(1))
+			//Driver Controls
+			Base->TankDrive(leftStick->GetY(), rightStick->GetY());
+			if (controller->GetRawAxis(3)>0.2)//Brings arm down
+			{
+				Base->ArmDown();
+			}
+			else if (controller->GetRawAxis(2)>0.2)//Brings arm up
+			{
+				Base->ArmUp();
+			}
+
+			if(rightStick->GetRawButton(1))
 			{
 				Base->Shift(true); // High Gear = reverse
 			}
-			else if(leftStick.GetRawButton(1))
+			else if(leftStick->GetRawButton(1))
 			{
 				Base->Shift(false); // Low Gear = forward
 			}// drive with arcade style (use right stick)
+			else if(rightStick->GetRawButton(3))
+			{
+				intake->Set(0.8);//Intake code for driver
+			}
+			//Operator Controls
 			if (controller->GetRawButton(4))
 			{
-				Base->Shooter(true);//shooter aim up
+				Base->Shooter(true);//shooter position is aimed up
 			}
 			else if (controller->GetRawButton(2))
 			{
-				Base->Shooter(false);//shooter aim down
+				Base->Shooter(false);//shooter position is aimed down
 			}
-			else if (controller->GetRawButton())//Brings arm down
-			{
-				if(!Upperlimit->Get() && !(shooterAim->Get() == DoubleSolenoid::kReverse) )
-				{
-					armMotor->Set(0.50);
-				}
-				else
-				{
-					armMotor->Set(0.0);
-				}
-			}
-			else if (controller->GetRawButton())//Brings arm up
-			{
 
+			else if(controller->GetRawButton(6))
+			{
+			/*
+			{
+				int choice = 1;
+				switch(choice)
+				{
+					case 1:
+						intake->Set(-0.85);
+						leftIndexer->Set(-0.50108);
+						rightIndexer->Set(0.50108);
+						if(ballDetect->GetRangeInches()<3)
+						{
+							choice = 2;
+							counter = 0;
+						}
+						std::printf("CHOICE 1\r\n");
+						break;
+					case 2:
+						if(counter%315 == 0)//115
+						{
+							leftIndexer->Set(0.0);
+							rightIndexer->Set(0.0);
+							choice = 3;
+						}
+						counter++;
+						std::printf("CHOICE 2\r\n");
+						break;
+					case 3:
+						intake->Set(0.0);
+						std::printf("CHOICE 3\r\n");
+						break;
+		        }
+				*/
 			}
+			else if(controller->GetRawButton(1))
+			{
+				Base->ShootBall(true);
+			}
+
 			Wait(0.005);				// wait for a motor update time
 		}
 
 	}
 	//Autonomous Methods
 private:
-	void
 
 	/**
 	 * Runs during test mode
