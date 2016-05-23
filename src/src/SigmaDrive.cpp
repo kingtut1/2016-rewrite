@@ -217,6 +217,7 @@ void SigmaDrive::TwoPointAuto()
 void SigmaDrive::Lowbar()
 {
 	Shift(false);
+	Shooter(false);//shooterAim down
 	ArmDown();
 	RunTobyRun(FORWARD, LOWGEAR, 12, 0.7);
 	RunTobyRun(BACKWARD, LOWGEAR, 11, 0.7);

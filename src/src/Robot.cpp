@@ -44,7 +44,6 @@ public:
 		leftStick = new Joystick(0);
 		rightStick = new Joystick(1);
 		controller = new Joystick(2);
-
 	}
 
 	/**
@@ -58,37 +57,18 @@ public:
 	 */
 	void Autonomous()
 	{
-		std::string autoSelected = *((std::string*)chooser->GetSelected());
-		//std::string autoSelected = SmartDashboard::GetString("Auto Selector", autoNameDefault);
-		std::cout << "Auto selected: " << autoSelected << std::endl;
 		Auto = (Option*) chooser->GetSelected();
 		if(Auto->Get() == 1)
 		{
-			//Low Bar code here
-			printf("Hiiiiiiiiiiiii");
-			std::cout << "Running Lowbar code" << std::endl;
 			Base->Lowbar();
-			std::cout << "Running custom Autonomous" << std::endl;
- 	// stop robot
 		}
 		else if(Auto->Get() == 2)
 		{
-			 //Standard defense codes here
-			std::cout << "Running defenses code" << std::endl;
 			Base->Moat();
-			std::cout << "Running default Autonomous" << std::endl;
-	// stop robot
 		}
 		else if(Auto->Get() == 3)
 		{
-			//2 point auto code here
-			std::cout << "Running TwoPointAuto" << std::endl;
 			Base->TwoPointAuto();
-			/*
-			 * Testing Auto
-			 */
-			Base->rightEnc->Reset();
-			Base->leftEnc->Reset();
 		}
 	}
 	/**
