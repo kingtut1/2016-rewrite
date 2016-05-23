@@ -18,6 +18,7 @@ public:
 	Encoder *leftEnc, *rightEnc;
 	ADXRS450_Gyro *gyro;
 	DigitalInput *Upperlimit, *Lowerlimit;
+	Ultrasonic *ballDetect;
 	SigmaDrive();
 	void TankDrive(double l, double r);
 	void TankDrive(Joystick l, Joystick r);
@@ -26,8 +27,14 @@ public:
 	void Shooter(bool Up);
 	void ArmDown();
 	void ArmUp();
-	void Intake(bool running);
-	void ShootBall(bool shoot);
-	void IntakeAndShoot(bool run );
+	void Intake();
+	void Release();
+	void Shoot(bool fire);
+	void StopAll();
+	void RunTobyRun(int Direction, int Gear, double Distance, double SpeedPWM);
+	void Moat();
+	void TwoPointAuto();
+	void Lowbar();
+	int choice = 1, counter = 1;
 };
 #endif /* SRC_SIGMADRIVE_H_ */
